@@ -5,6 +5,15 @@ All notable changes to seeqbox. The format follows
 [Semantic Versioning](https://semver.org/). The vault format version is
 separate from the package version ([docs/format.md](docs/format.md)).
 
+## 0.1.1 - 2026-10-19
+
+- The PyPI project page shows the project icon and the README links work
+  outside the repository.
+- Tests cover identity validation, the staged-content guard's rejections,
+  manifest and recipient tampering, working-directory conflicts, and the CLI
+  identity sources; coverage is reported to Codecov.
+- GitHub Actions updated to their current versions.
+
 ## 0.1.0 - 2026-10-19
 
 - Encrypted vaults in Git: immutable age objects behind an encrypted,

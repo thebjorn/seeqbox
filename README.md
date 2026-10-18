@@ -14,7 +14,7 @@ It encrypts files and their names/metadata with [age](https://age-encryption.org
 Git stores ciphertext; private keys live elsewhere. An optional
 [seeqret](https://github.com/thebjorn/seeqret) adapter supplies age identities.
 
-**Status: 0.1.0, experimental.** Real age integration tests cover recovery,
+**Status: experimental.** Real age integration tests cover recovery,
 tampering, conflicts, and Git staging. The implementation has not undergone an
 independent security audit. Start with synthetic data and test your recovery
 process before entrusting important records to it.
