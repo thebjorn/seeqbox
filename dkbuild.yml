@@ -3,7 +3,7 @@ _schema: https://static.datakortet.no/schema/dkbuild.schema.yaml
 package:
     name: seeqbox
     description: Encrypted, versionable data for your applications.
-    version: 0.1.0
+    version: 0.1.1
     created: 2026
 
     package_name: seeqbox
