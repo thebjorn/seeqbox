@@ -6,8 +6,15 @@ import os
 from .age import FileIdentity
 from .errors import ConflictError, SeeqboxError
 from .files import (
-    MAX_MANIFEST_SIZE, STATE_NAME, atomic_write, bounded_read, check_names,
-    digest, json_bytes, read_json, reject_links,
+    MAX_MANIFEST_SIZE,
+    STATE_NAME,
+    atomic_write,
+    bounded_read,
+    check_names,
+    digest,
+    json_bytes,
+    read_json,
+    reject_links,
 )
 from .vault import Vault
 
@@ -17,10 +24,17 @@ def _directory(vault: Vault, directory: str | Path) -> Path:
     reject_links(directory)
     directory = directory.resolve()
     if directory == vault.root or directory in vault.root.parents or vault.root in directory.parents:
-        raise SeeqboxError("Working directory and encrypted vault must be separate.")
+        raise SeeqboxError(
+            "Working directory and encrypted vault must be separate."
+        )
     if isinstance(vault.identity, FileIdentity):
-        if any(directory == p or directory in p.parents for p in vault.identity.paths):
-            raise SeeqboxError("Private identity files must be outside the working directory.")
+        if any(
+            directory == p or directory in p.parents
+            for p in vault.identity.paths
+        ):
+            raise SeeqboxError(
+                "Private identity files must be outside the working directory."
+            )
     if directory.exists() and not directory.is_dir():
         raise SeeqboxError("Working directory must be a directory.")
     return directory
@@ -32,22 +46,38 @@ def _state(vault: Vault, directory: Path) -> dict | None:
     if not path.exists():
         return None
     state = read_json(bounded_read(path, MAX_MANIFEST_SIZE))
-    if (state.get("vault_id") != vault.vault_id
-            or not isinstance(state.get("generation"), str)
-            or not isinstance(state.get("files"), dict)):
-        raise ConflictError("Working directory belongs to a different or invalid vault.")
+    if (
+        state.get("vault_id") != vault.vault_id
+        or not isinstance(state.get("generation"), str)
+        or not isinstance(state.get("files"), dict)
+    ):
+        raise ConflictError(
+            "Working directory belongs to a different or invalid vault."
+        )
     check_names(state["files"])
-    if any(not isinstance(value, str) or len(value) != 64
-           for value in state["files"].values()):
+    if any(
+        not isinstance(value, str) or len(value) != 64
+        for value in state["files"].values()
+    ):
         raise ConflictError("Invalid working directory state.")
     return state
 
 
 def _save_state(vault: Vault, directory: Path) -> None:
-    atomic_write(directory / STATE_NAME, json_bytes({
-        "vault_id": vault.vault_id, "generation": vault.generation,
-        "files": {name: entry["sha256"] for name, entry in vault.list().items()},
-    }) + b"\n")
+    atomic_write(
+        directory / STATE_NAME,
+        json_bytes(
+            {
+                "vault_id": vault.vault_id,
+                "generation": vault.generation,
+                "files": {
+                    name: entry["sha256"]
+                    for name, entry in vault.list().items()
+                },
+            }
+        )
+        + b"\n",
+    )
 
 
 def _files(directory: Path) -> dict[str, Path]:
@@ -56,7 +86,9 @@ def _files(directory: Path) -> dict[str, Path]:
         for name in dirs:
             reject_links(Path(folder) / name)
             if name.casefold() == ".git":
-                raise SeeqboxError("Working directory must not contain a Git repository.")
+                raise SeeqboxError(
+                    "Working directory must not contain a Git repository."
+                )
         for name in files:
             path = Path(folder) / name
             reject_links(path)
@@ -75,14 +107,20 @@ def seal(vault: Vault, directory: str | Path, *, prune: bool = False) -> int:
         raise SeeqboxError("Working directory does not exist.")
     state = _state(vault, directory)
     if state is None and vault.list():
-        raise ConflictError("Unlock this vault first; a nonempty vault needs a known working copy.")
+        raise ConflictError(
+            "Unlock this vault first; a nonempty vault needs a known working copy."
+        )
     if state and state["generation"] != vault.generation:
-        raise ConflictError("Working copy is stale. Reconcile local edits before sealing.")
+        raise ConflictError(
+            "Working copy is stale. Reconcile local edits before sealing."
+        )
     paths = _files(directory)
     values = {name: (bounded_read(path), None) for name, path in paths.items()}
     missing = set(vault.list()) - set(values)
     if missing and not prune:
-        raise ConflictError("Files are missing. Restore them or explicitly seal with --prune.")
+        raise ConflictError(
+            "Files are missing. Restore them or explicitly seal with --prune."
+        )
     changed = vault.update(values, delete=sorted(missing) if prune else ())
     _save_state(vault, directory)
     return changed
@@ -102,13 +140,21 @@ def unlock(vault: Vault, directory: str | Path) -> int:
         for name, path in existing.items():
             current = digest(bounded_read(path))
             if name in previous:
-                if current != previous[name] and (name not in entries or current != entries[name]["sha256"]):
-                    raise ConflictError("Working directory contains local edits; nothing was overwritten.")
+                if current != previous[name] and (
+                    name not in entries or current != entries[name]["sha256"]
+                ):
+                    raise ConflictError(
+                        "Working directory contains local edits; nothing was overwritten."
+                    )
             elif name in entries and current != entries[name]["sha256"]:
-                raise ConflictError("Restore would overwrite an unrelated local file.")
+                raise ConflictError(
+                    "Restore would overwrite an unrelated local file."
+                )
         for name in previous:
             if name not in existing and name in entries:
-                raise ConflictError("A local deletion must be reconciled before unlocking.")
+                raise ConflictError(
+                    "A local deletion must be reconciled before unlocking."
+                )
     directory.mkdir(parents=True, exist_ok=True)
     for name, content in contents.items():
         target = directory / name

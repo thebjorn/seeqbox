@@ -6,6 +6,12 @@ from .vault import Vault
 
 __version__ = "0.1.0"
 __all__ = [
-    "Age", "ConflictError", "FileIdentity", "IdentityProvider", "IntegrityError",
-    "SeeqboxError", "SeeqretIdentity", "Vault",
+    "Age",
+    "ConflictError",
+    "FileIdentity",
+    "IdentityProvider",
+    "IntegrityError",
+    "SeeqboxError",
+    "SeeqretIdentity",
+    "Vault",
 ]

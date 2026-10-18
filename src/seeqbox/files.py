@@ -20,8 +20,13 @@ def digest(data: bytes) -> str:
 
 
 def json_bytes(value: object) -> bytes:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"),
-                      ensure_ascii=False, allow_nan=False).encode("utf-8")
+    return json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode("utf-8")
 
 
 def read_json(data: bytes) -> dict:
@@ -32,6 +37,7 @@ def read_json(data: bytes) -> dict:
                 raise ValueError("duplicate key")
             result[key] = value
         return result
+
     try:
         value = json.loads(data, object_pairs_hook=unique)
         if not isinstance(value, dict):
@@ -48,7 +54,9 @@ def reject_links(path: Path) -> None:
             info = item.lstat()
         except FileNotFoundError:
             continue
-        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+        if stat.S_ISLNK(info.st_mode) or getattr(
+            info, "st_file_attributes", 0
+        ) & 0x400:
             raise SeeqboxError("Symlinks and reparse points are not supported.")
 
 
@@ -60,14 +68,22 @@ def portable_name(name: str) -> None:
         raise SeeqboxError("Object names must use NFC Unicode normalization.")
     parts = name.split("/")
     reserved = {"CON", "PRN", "AUX", "NUL", "CONIN$", "CONOUT$"}
-    reserved |= {f"{prefix}{n}" for prefix in ("COM", "LPT") for n in range(1, 10)}
+    reserved |= {
+        f"{prefix}{n}" for prefix in ("COM", "LPT") for n in range(1, 10)
+    }
     reserved |= {f"{prefix}{n}" for prefix in ("COM", "LPT") for n in "¹²³"}
     for part in parts:
-        if (not part or part in {".", ".."} or part.endswith((".", " "))
-                or part.casefold() in {".git", STATE_NAME}
-                or any(ord(c) < 32 or c in '\\:<>"|?*' for c in part)
-                or part.split(".")[0].rstrip().upper() in reserved):
-            raise SeeqboxError("Object names must be safe relative portable paths.")
+        if (
+            not part
+            or part in {".", ".."}
+            or part.endswith((".", " "))
+            or part.casefold() in {".git", STATE_NAME}
+            or any(ord(c) < 32 or c in '\\:<>"|?*' for c in part)
+            or part.split(".")[0].rstrip().upper() in reserved
+        ):
+            raise SeeqboxError(
+                "Object names must be safe relative portable paths."
+            )
     if PurePosixPath(name).is_absolute():
         raise SeeqboxError("Absolute object names are not supported.")
 
@@ -78,13 +94,17 @@ def check_names(names) -> None:
         portable_name(name)
         folded = name.casefold()
         if folded in seen:
-            raise SeeqboxError("Object names collide on a case-insensitive filesystem.")
+            raise SeeqboxError(
+                "Object names collide on a case-insensitive filesystem."
+            )
         seen.add(folded)
     for name in seen:
         parent = PurePosixPath(name).parent
         while str(parent) != ".":
             if str(parent) in seen:
-                raise SeeqboxError("An object name conflicts with a directory name.")
+                raise SeeqboxError(
+                    "An object name conflicts with a directory name."
+                )
             parent = parent.parent
 
 
@@ -102,7 +122,9 @@ def bounded_read(path: Path, limit: int = MAX_OBJECT_SIZE) -> bytes:
 def atomic_write(path: Path, data: bytes) -> None:
     reject_links(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    fd, temporary = tempfile.mkstemp(prefix=".seeqbox-", suffix=".tmp", dir=path.parent)
+    fd, temporary = tempfile.mkstemp(
+        prefix=".seeqbox-", suffix=".tmp", dir=path.parent
+    )
     try:
         with os.fdopen(fd, "wb") as stream:
             stream.write(data)

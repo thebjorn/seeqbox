@@ -23,7 +23,9 @@ class FileIdentity:
     paths: tuple[Path, ...]
 
     def __init__(self, *paths: str | Path):
-        object.__setattr__(self, "paths", tuple(Path(p).resolve() for p in paths))
+        object.__setattr__(
+            self, "paths", tuple(Path(p).resolve() for p in paths)
+        )
 
     def identity(self) -> tuple[list[str], bytes | None]:
         if not self.paths or any(not p.is_file() for p in self.paths):
@@ -44,9 +46,13 @@ class SeeqretIdentity:
             module = importlib.import_module("seeqret")
             value = module.get(self.key, app=self.app, env=self.env)
         except Exception:
-            raise SeeqboxError("Could not read the identity from seeqret.") from None
+            raise SeeqboxError(
+                "Could not read the identity from seeqret."
+            ) from None
         if not isinstance(value, str) or "AGE-SECRET-KEY-" not in value:
-            raise SeeqboxError("The seeqret value must contain a native age identity.")
+            raise SeeqboxError(
+                "The seeqret value must contain a native age identity."
+            )
         return ["-i", "-"], (value.rstrip() + "\n").encode("utf-8")
 
 
@@ -56,15 +62,20 @@ class Age:
     def __init__(self, executable: str = "age", timeout: float = 60):
         self.executable = shutil.which(executable)
         if self.executable is None:
-            raise SeeqboxError("age was not found. Install age and add it to PATH.")
+            raise SeeqboxError(
+                "age was not found. Install age and add it to PATH."
+            )
         self.timeout = timeout
 
     def _run(self, args: list[str], data: bytes | None = None) -> bytes:
         try:
             result = subprocess.run(
-                [self.executable, *args], input=data if data is not None else b"",
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                timeout=self.timeout, check=False,
+                [self.executable, *args],
+                input=data if data is not None else b"",
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                timeout=self.timeout,
+                check=False,
             )
         except (OSError, subprocess.TimeoutExpired):
             raise SeeqboxError("age could not finish the operation.") from None
