@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "seeqbox"
+version = "0.1.0"
+description = "Encrypted, versionable data for your applications."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name = "Bjørn Pettersen"}]
+keywords = ["age", "encryption", "git", "vault", "storage"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+  "Topic :: Security :: Cryptography",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "build>=1"]
+seeqret = ["seeqret"]
+
+[project.scripts]
+seeqbox = "seeqbox.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/thebjorn/seeqbox"
+Issues = "https://github.com/thebjorn/seeqbox/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+seeqbox = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
