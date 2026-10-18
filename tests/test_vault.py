@@ -18,6 +18,7 @@ def test_round_trip_and_metadata_are_private(vault):
     assert vault.get(name) == payload
     assert vault.list()[name]["metadata"] == metadata
     assert vault.verify() == 1
+
     for path in vault.root.rglob("*"):
         if path.is_file():
             raw = path.read_bytes()
@@ -102,10 +103,13 @@ def test_failed_manifest_write_preserves_previous_snapshot(vault, monkeypatch):
     vault.put("old", b"old")
     previous = (vault.root / "manifest.age").read_bytes()
     original = vault.age.encrypt
+
     def fail_manifest(data, recipients):
         if data.startswith(b'{"format":"seeqbox"'):
             raise SeeqboxError("synthetic failure")
+
         return original(data, recipients)
+
     monkeypatch.setattr(vault.age, "encrypt", fail_manifest)
     with pytest.raises(SeeqboxError):
         vault.put("new", b"new")
@@ -118,8 +122,10 @@ def test_multiple_recipients_and_rotation(vault, identities):
     vault.put("record", b"test")
     old_manifest = (vault.root / "manifest.age").read_bytes()
     vault.rotate([identities[0][1], identities[1][1], identities[2][1]])
+
     for path, _ in identities:
         assert Vault(vault.root, FileIdentity(path)).get("record") == b"test"
+
     vault.rotate([identities[1][1]])
     assert Vault(vault.root, FileIdentity(identities[1][0])).get("record") == b"test"
     with pytest.raises(SeeqboxError):
@@ -129,7 +135,23 @@ def test_multiple_recipients_and_rotation(vault, identities):
     assert json.loads(Age().decrypt(historical, FileIdentity(identities[0][0])))["objects"]
 
 
-@pytest.mark.parametrize("name", ["../escape", "/absolute", "a\\b", "C:/escape", ".git/config", "NUL", "COM1.txt", "a.", "a ", "a//b", ".seeqbox-state.json", "a\x00b"])
+@pytest.mark.parametrize(
+    "name",
+    [
+        "../escape",
+        "/absolute",
+        "a\\b",
+        "C:/escape",
+        ".git/config",
+        "NUL",
+        "COM1.txt",
+        "a.",
+        "a ",
+        "a//b",
+        ".seeqbox-state.json",
+        "a\x00b",
+    ],
+)
 def test_unsafe_names_rejected(vault, name):
     with pytest.raises(SeeqboxError):
         vault.put(name, b"x")
@@ -147,16 +169,20 @@ def test_manifest_path_traversal_rejected(vault, identities):
     vault.put("record", b"x")
     document = json.loads(Age().decrypt(vault.root / "manifest.age", vault.identity))
     document["objects"]["record"]["blob"] = "../../outside.age"
-    (vault.root / "manifest.age").write_bytes(Age().encrypt(json_bytes(document), [identities[0][1]]))
+    (vault.root / "manifest.age").write_bytes(
+        Age().encrypt(json_bytes(document), [identities[0][1]])
+    )
     with pytest.raises(IntegrityError):
         Vault(vault.root, vault.identity)
 
 
 def test_seeqret_provider_uses_stdin(vault, identities, monkeypatch):
     calls = []
+
     def get(key, **kwargs):
         calls.append((key, kwargs))
         return identities[0][0].read_text()
+
     monkeypatch.setitem(sys.modules, "seeqret", SimpleNamespace(get=get))
     unlocked = Vault(vault.root, SeeqretIdentity("TEST_AGE"))
     unlocked.put("sample", b"test")
@@ -167,9 +193,17 @@ def test_seeqret_provider_uses_stdin(vault, identities, monkeypatch):
 def test_plain_age_recovery(vault):
     vault.put("sample", b"portable recovery")
     entry = vault.list()["sample"]
-    result = subprocess.run(["age", "-d", "-i", str(vault.identity.paths[0]),
-                             str(vault.root / "objects" / entry["blob"])],
-                            capture_output=True, check=True)
+    result = subprocess.run(
+        [
+            "age",
+            "-d",
+            "-i",
+            str(vault.identity.paths[0]),
+            str(vault.root / "objects" / entry["blob"]),
+        ],
+        capture_output=True,
+        check=True,
+    )
     assert result.stdout == b"portable recovery"
 
 

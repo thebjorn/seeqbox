@@ -60,6 +60,10 @@ Follow the full style guide; these are the most relevant points for this codebas
 - Maintain useful type annotations and the public `py.typed` marker.
 - Keep changes focused. Avoid unrelated renames, formatting sweeps, or new
   dependencies when implementing a small feature or fix.
+- Format Python with rainbow-fmt before handing off (`rainbow-fmt format src
+  tests`). The `[tool.rainbow]` table in `pyproject.toml` selects the
+  `rainbow:styleguide` preset, which is the style guide expressed as formatter
+  options; the "Formatter" section of the style guide lists what it decides.
 
 ## Encryption and data-handling constraints
 
@@ -99,6 +103,7 @@ Run commands from the repository root. Install Python 3.11+ and the official
 python -m pip install -e ".[dev]"
 age --version
 python -m pytest -q
+rainbow-fmt check src tests
 python -m build
 ```
 
@@ -107,7 +112,8 @@ depend on a developer's private key or seeqret vault. Missing age executables
 are an environment problem, not a reason to silently skip the integration suite.
 
 Run focused tests while developing. For changes to encryption, persisted data,
-filesystem behavior, or the CLI, run the full suite before handing off. Verify
+filesystem behavior, or the CLI, run the full suite before handing off. CI
+fails when `rainbow-fmt check` reports a Python file that would change. Verify
 packaging with `python -m build` when changing package metadata, dependencies,
 exports, or included files. Documentation-only edits need link/content checks,
 not an automatic full test run.

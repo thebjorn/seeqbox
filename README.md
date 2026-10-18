@@ -185,6 +185,7 @@ before sealing. Raw filesystem copies of active databases are not supported.
 ```powershell
 python -m pip install -e '.[dev]'
 python -m pytest -q
+rainbow-fmt check src tests
 python -m build
 ```
 

@@ -75,7 +75,11 @@ def test_staged_guard_rejects_private_keys(vault, tmp_path):
 def test_staged_guard_rejects_public_metadata(vault, tmp_path):
     _git(tmp_path, "init")
     config = vault.root / "format.json"
-    config.write_text('{"format":"seeqbox","version":1,"vault_id":"' + vault.vault_id + '","patient":"synthetic"}')
+    config.write_text(
+        '{"format":"seeqbox","version":1,"vault_id":"'
+        + vault.vault_id
+        + '","patient":"synthetic"}'
+    )
     _git(tmp_path, "add", "vault")
     with pytest.raises(SeeqboxError):
         check_staged(vault.root, tmp_path / "data", cwd=tmp_path)
@@ -99,8 +103,18 @@ def test_git_commit_archive_recovery(vault, tmp_path, identities):
     _git(tmp_path, "init")
     vault.put("sample.txt", b"recover from another clone")
     _git(tmp_path, "add", "vault")
-    _git(tmp_path, "-c", "user.name=seeqbox-test", "-c", "user.email=test@example.invalid",
-         "-c", "commit.gpgsign=false", "commit", "-m", "Synthetic encrypted fixture")
+    _git(
+        tmp_path,
+        "-c",
+        "user.name=seeqbox-test",
+        "-c",
+        "user.email=test@example.invalid",
+        "-c",
+        "commit.gpgsign=false",
+        "commit",
+        "-m",
+        "Synthetic encrypted fixture",
+    )
     recovered = tmp_path.parent / (tmp_path.name + "-recovered")
     archive = _git(tmp_path, "archive", "--format=zip", "HEAD")
     with zipfile.ZipFile(io.BytesIO(archive)) as bundle:

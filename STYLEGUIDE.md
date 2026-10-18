@@ -5,6 +5,7 @@
   - [General Principles](#general-principles)
     - [Structuring code](#structuring-code)
   - [Formatting](#formatting)
+  - [Formatter](#formatter)
   - [Naming Conventions](#naming-conventions)
   - [Quotes](#quotes)
   - [Data Structures Formatting](#data-structures-formatting)
@@ -62,6 +63,34 @@ Use the relevant MCP servers and/or LSP servers when available.
 - use blank lines to separate thoughts inside functions (e.g., between logical blocks of code).
 - Prefer single quotes for strings unless the string contains a single quote character.
 - Place imports at the top of the file, grouped by standard library, third-party, and local imports.
+
+## Formatter
+
+Code is formatted with [rainbow-fmt](https://pypi.org/project/rainbow-fmt/). The
+`[tool.rainbow]` table in `pyproject.toml` selects the `rainbow:styleguide` preset,
+which is this style guide expressed as formatter options, rule by rule. Run it from
+the repository root:
+
+    rainbow-fmt format src tests    # rewrite files in place
+    rainbow-fmt check src tests     # report files that would change; CI runs this
+    rainbow-fmt diff src tests      # print the changes without applying them
+    rainbow-fmt options FILE        # every option in effect for FILE and where it comes from
+
+What the preset decides for Python:
+
+| Rule in this guide | Option |
+| --- | --- |
+| 4 spaces for indentation, no tabs | `core.indent_style = "space"`, `core.indent_size = 4` |
+| Lines up to 79, preferably at most 100 | `core.max_width = 99` (120 for HTML and Svelte). A line that fits in 99 columns is left alone, so keep aiming for 79 by hand. |
+| Blank lines separate thoughts inside functions | `language.python.statement_blank_lines = "separate"`: a blank line before and after a `for`/`while` loop, after an `if` statement, and before an `if` that follows another `if` or a loop. `core.max_blank_lines = 1` keeps the blank lines you wrote, at most one in a row. |
+| Lists one value per line with a trailing comma; short lists on one line | `shared.trailing_comma = "multiline"`, `language.python.bracket_wrap = "magic_trailing_comma"`: a list that fits stays on one line, one written broken stays broken. |
+| Lists of dicts as `[{` ... `}, {` ... `}]` | `language.python.bracket_hug = true` |
+| Docstrings as shown under Python guidelines | `language.python.docstrings = "aligned"`: closing quotes on their own line, continuation lines under the first letter of the summary. |
+| PEP 8 blank lines, inline comments, and operator breaks | `definition_blank_lines = "enforce"`, `top_level_blank_lines = 2`, `nested_blank_lines = 1`, `inline_comment_spaces = 2`, `binary_operator_break = "before"` |
+
+The formatter never changes quotes, names, or the order of imports; apply
+those rules by hand. Wrap a block in `# rainbow: off` ... `# rainbow: on` to
+keep it exactly as written.
 
 ## Naming Conventions
 Follow these naming conventions even in languages that normally use different conventions:

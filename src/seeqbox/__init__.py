@@ -1,4 +1,5 @@
-"""Encrypted, versionable data for your applications."""
+"""Encrypted, versionable data for your applications.
+"""
 
 from .age import Age, FileIdentity, IdentityProvider, SeeqretIdentity
 from .errors import ConflictError, IntegrityError, SeeqboxError

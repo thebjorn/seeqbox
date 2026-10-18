@@ -19,7 +19,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "build>=1"]
+dev = ["pytest>=8", "build>=1", "rainbow-fmt==0.4.1"]
 seeqret = ["seeqret"]
 
 [project.scripts]
@@ -38,3 +38,9 @@ seeqbox = ["py.typed"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+# Code formatting (see STYLEGUIDE.md, "Formatter"). The preset is the
+# rainbow-fmt configuration derived from STYLEGUIDE.md; run
+# `rainbow-fmt options FILE` to see every value it sets and where it comes from.
+[tool.rainbow]
+preset = "rainbow:styleguide"
