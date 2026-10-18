@@ -22,7 +22,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "build>=1", "rainbow-fmt==0.4.1"]
+dev = ["pytest>=8", "pytest-cov>=6", "build>=1", "rainbow-fmt==0.4.1"]
 seeqret = ["seeqret"]
 
 [project.scripts]

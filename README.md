@@ -1,6 +1,11 @@
-<p align="center"><img src="assets/icon.png" alt="seeqbox secure storage cube" width="160"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/thebjorn/seeqbox/main/assets/icon.png" alt="seeqbox secure storage cube" width="160"></p>
 
 # seeqbox
+
+[![Tests](https://github.com/thebjorn/seeqbox/actions/workflows/ci.yml/badge.svg)](https://github.com/thebjorn/seeqbox/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/thebjorn/seeqbox/branch/main/graph/badge.svg)](https://codecov.io/gh/thebjorn/seeqbox)
+[![Downloads](https://static.pepy.tech/badge/seeqbox)](https://pepy.tech/project/seeqbox)
+[![Socket](https://socket.dev/api/badge/pypi/package/seeqbox/latest)](https://socket.dev/pypi/package/seeqbox)
 
 **Encrypted, versionable data for your applications.**
 
