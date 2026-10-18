@@ -15,15 +15,12 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python: ['3.12', '3.13']
     runs-on: ${{ matrix.os }}
-    permissions:
-      contents: read
-      id-token: write  # Codecov upload by OIDC; no token is stored.
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python }}
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version: stable
           cache: false
@@ -37,12 +34,13 @@ jobs:
       - name: Check formatting
         run: rainbow-fmt check --no-cache src tests
       - name: Test with real age
-        run: python -m pytest -q --cov=seeqbox --cov-report=xml
-      - name: Upload coverage to Codecov
+        run: python -m pytest -q --cov=seeqbox --cov-branch --cov-report=xml
+      - name: Upload coverage reports to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.13'
         uses: codecov/codecov-action@v7.1.1
         with:
-          use_oidc: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: thebjorn/seeqbox
           files: coverage.xml
           fail_ci_if_error: false
       - name: Build distributions
