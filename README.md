@@ -26,22 +26,28 @@ process before entrusting important records to it.
 - No Python runtime dependencies; age is a separate, required executable.
 
 It does not commit or push automatically. It is not a database engine, sync
-service, browser SDK, or clinical application. See [the security model](SECURITY.md).
+service, browser SDK, or clinical application. See [the security model](https://github.com/thebjorn/seeqbox/blob/main/SECURITY.md).
 
 ## Install
 
-Requires Python 3.11+ and `age` / `age-keygen` on PATH. Tested locally with age
+Requires Python 3.12+ and `age` / `age-keygen` on PATH. Tested locally with age
 1.3.2. Use the [official age downloads](https://github.com/FiloSottile/age/releases).
 
 ```powershell
-git clone https://github.com/thebjorn/seeqbox.git
-cd seeqbox
-python -m pip install -e .
+python -m pip install seeqbox
 seeqbox --version
 age --version
 ```
 
-This initial version is distributed from GitHub; it has not been published to PyPI.
+Releases are on [PyPI](https://pypi.org/project/seeqbox/); the
+[changelog](https://github.com/thebjorn/seeqbox/blob/main/CHANGELOG.md) lists what each one changed. To work on seeqbox
+itself, clone the repository and install it editable:
+
+```powershell
+git clone https://github.com/thebjorn/seeqbox.git
+cd seeqbox
+python -m pip install -e ".[dev]"
+```
 
 ## Quick start (PowerShell)
 
@@ -122,7 +128,7 @@ vault.update({"one.txt": (b"one", {}), "two.txt": (b"two", {})})
 Names are portable relative paths. Metadata is any JSON object. `put` returns
 `False` for an unchanged object. A `Vault` is a snapshot: reopen it after another
 writer commits a change. Errors are `SeeqboxError`, `IntegrityError`, and
-`ConflictError`. See [format v1](docs/format.md) for interoperability and recovery.
+`ConflictError`. See [format v1](https://github.com/thebjorn/seeqbox/blob/main/docs/format.md) for interoperability and recovery.
 
 ## Using seeqret
 
@@ -192,5 +198,17 @@ python -m build
 Tests generate temporary identities and use exclusively synthetic data. CI tests
 Windows, Linux, and macOS. Future work includes streaming large objects, structured
 merge tooling, and JavaScript bindings to the documented format.
+
+## Contributing
+
+1. Fork it
+2. It is appreciated (but not required) if you raise an issue first:
+   https://github.com/thebjorn/seeqbox/issues
+3. Create your feature branch (`git checkout -b my-new-feature`)
+4. Commit your changes (`git commit -am 'Add some feature'`), after running
+   the checks listed above and adding a line to the `Unreleased` section of
+   [CHANGELOG.md](https://github.com/thebjorn/seeqbox/blob/main/CHANGELOG.md)
+5. Push to the branch (`git push origin my-new-feature`)
+6. Create new Pull Request
 
 MIT licensed. The generated project icon is in `assets/icon.png`.

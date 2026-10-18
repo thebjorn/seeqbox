@@ -1,0 +1,14 @@
+_schema: https://static.datakortet.no/schema/dkbuild.schema.yaml
+
+package:
+    name: seeqbox
+    description: Encrypted, versionable data for your applications.
+    version: 0.1.0
+    created: 2026
+
+    package_name: seeqbox
+    # The src layout: `dk upversion` bumps these besides pyproject.toml and this file.
+    versioned:
+        - src/seeqbox/__init__.py
+build:
+    venv: seeqbox

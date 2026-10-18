@@ -1,0 +1,99 @@
+# Publish a release to PyPI (docs/releasing.md).
+#
+# Runs for tags vX.Y.Z: tests, then build (the wheel must carry the tag's
+# version and CHANGELOG.md must have the version's section), then upload by
+# trusted publishing (no token is stored; PyPI trusts this workflow's OIDC
+# identity in the "pypi" environment), then a GitHub release with the
+# changelog section as its notes.
+name: Publish
+
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: false
+      - name: Install pinned official age source
+        run: go install filippo.io/age/cmd/...@v1.3.2
+      - name: Add Go tools to PATH
+        run: echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - name: Install package and test dependencies
+        run: python -m pip install -e ".[dev]"
+      - name: Check formatting
+        run: rainbow-fmt check --no-cache src tests
+      - name: Test with real age
+        run: python -m pytest -q
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install build tools
+        run: python -m pip install build twine
+      - name: Build distributions
+        run: python -m build
+      - name: Check that the tag names the version being published
+        run: test -f "dist/seeqbox-${GITHUB_REF_NAME#v}-py3-none-any.whl"
+      - name: Check the distributions
+        run: python -m twine check dist/*
+      - name: Extract the release notes from CHANGELOG.md
+        run: python ci/release_notes.py "$GITHUB_REF_NAME" > dist/release_notes.md
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/seeqbox/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+      - name: Keep only the distributions
+        run: rm dist/release_notes.md
+      - uses: pypa/gh-action-pypi-publish@v1.14.2
+
+  release:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "seeqbox ${GITHUB_REF_NAME#v}" \
+            --notes-file dist/release_notes.md \
+            dist/*.whl dist/*.tar.gz

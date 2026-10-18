@@ -18,7 +18,7 @@ These instructions apply throughout this repository. Read any more specific
 
 seeqbox is a Python library and CLI that orchestrates the official age executable
 to store encrypted application data in Git. It is a reusable storage component,
-not a health-specific application. Python 3.11 and newer are supported.
+not a health-specific application. Python 3.12 and newer are supported.
 
 | Path | Responsibility |
 | --- | --- |
@@ -32,6 +32,9 @@ not a health-specific application. Python 3.11 and newer are supported.
 | `src/seeqbox/__init__.py` | Public exports and package version |
 | `tests/` | Unit and integration tests using synthetic data and real age |
 | `.github/workflows/ci.yml` | Cross-platform tests and distribution builds |
+| `.github/workflows/publish.yml` | PyPI release on `vX.Y.Z` tags; see `docs/releasing.md` |
+| `ci/` | Scripts the publish workflow runs |
+| `CHANGELOG.md` | Release notes; the `Unreleased` section collects changes |
 | `assets/` | Project icon and asset documentation |
 
 The core package has no Python runtime dependencies. Keep the seeqret identity
@@ -96,7 +99,7 @@ Follow the full style guide; these are the most relevant points for this codebas
 
 ## Development and verification
 
-Run commands from the repository root. Install Python 3.11+ and the official
+Run commands from the repository root. Install Python 3.12+ and the official
 `age` and `age-keygen` executables on PATH. CI currently uses age 1.3.2.
 
 ```text
@@ -118,7 +121,7 @@ packaging with `python -m build` when changing package metadata, dependencies,
 exports, or included files. Documentation-only edits need link/content checks,
 not an automatic full test run.
 
-CI tests and builds on Windows, macOS, and Ubuntu with Python 3.11 and 3.13.
+CI tests and builds on Windows, macOS, and Ubuntu with Python 3.12 and 3.13.
 Keep Windows paths and subprocess behavior in mind. Use age's `-o` option for
 binary output in PowerShell examples rather than shell text redirection.
 
@@ -134,6 +137,8 @@ mocking a successful subprocess does not verify encryption or recovery.
 - Update format and security documentation when behavior or guarantees change.
   Preserve compatibility, or document an explicit format-version and recovery
   plan for an incompatible change.
+- Add user-visible changes to the `Unreleased` section of `CHANGELOG.md`.
+  Do not bump the version; releases follow `docs/releasing.md`.
 - Review the diff for unintended files and sensitive material before staging.
 - Report what changed, the checks actually run, and any remaining limitations.
   If an environment restriction prevents a check, say so explicitly.
