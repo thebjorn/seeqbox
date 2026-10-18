@@ -5,7 +5,7 @@ All notable changes to seeqbox. The format follows
 [Semantic Versioning](https://semver.org/). The vault format version is
 separate from the package version ([docs/format.md](docs/format.md)).
 
-## Unreleased
+## 0.1.0 - 2026-10-19
 
 - Encrypted vaults in Git: immutable age objects behind an encrypted,
   atomically replaced manifest, with exclusive writer locking, stale-manifest
